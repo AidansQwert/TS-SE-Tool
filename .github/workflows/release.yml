@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, e.g. v0.3.1.0'
+        required: true
+      dry_run:
+        description: 'Only build and package, do not publish a release'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Release notes are generated from the commit history, which a
+          # shallow clone does not carry.
+          fetch-depth: 0
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Add NuGet to PATH
+        uses: nuget/setup-nuget@v2
+
+      # The updater project already writes to "TS SE Tool/bin/Release/updater",
+      # which is the path FormCheckUpdates looks in, so the packaging step only
+      # has to take bin\Release as it is.
+      - name: Restore NuGet packages
+        run: nuget restore "TS SE Tool.sln" -PackagesDirectory packages
+
+      - name: Build
+        run: msbuild "TS SE Tool.sln" /m /v:minimal /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $staging = "package"
+          New-Item -ItemType Directory -Path $staging | Out-Null
+          Copy-Item -Path "TS SE Tool/bin/Release/*" -Destination $staging -Recurse
+          Compress-Archive -Path "$staging/*" -DestinationPath "TS-SE-Tool-$env:TAG.zip"
+          Get-Item "TS-SE-Tool-$env:TAG.zip" | Select-Object Name, Length | Format-List
+
+      - name: Upload package (dry run)
+        if: ${{ env.DRY_RUN == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: TS-SE-Tool-package
+          if-no-files-found: error
+          path: TS-SE-Tool-*.zip
+
+      - name: Publish GitHub release
+        if: ${{ env.DRY_RUN != 'true' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create $env:TAG "TS-SE-Tool-$env:TAG.zip" `
+            --target $env:GITHUB_SHA `
+            --title "TS SE Tool $env:TAG" `
+            --generate-notes
