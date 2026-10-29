@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2016-2022 LIPtoH <liptoh.codebase@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,8 @@ namespace TS_SE_Tool
         {
             InitializeComponent();
 
+            TS_SE_Tool.Utilities.UITheme.Apply(this);
+
             this.Icon = Utilities.TS_Graphics.IconFromImage(MainForm.ProgUIImgsDict["ProgramSettings"]);
 
             this.SuspendLayout();
@@ -46,18 +48,39 @@ namespace TS_SE_Tool
             LoadSettings();
         }
 
+        private bool themeLoaded = false;
+
         private void LoadSettings()
         {
             //Loading settings Setting checkboxes
             checkBoxShowSplashOnStartup.Checked = Properties.Settings.Default.ShowSplashOnStartup;
             checkBoxCheckUpdatesOnStartup.Checked = Properties.Settings.Default.CheckUpdatesOnStartup;
+
+            //Loading theme
+            comboBoxTheme.SelectedIndex = (int)TS_SE_Tool.Utilities.UITheme.ParseMode(Properties.Settings.Default.AppTheme);
+
+            themeLoaded = true;
+        }
+
+        private void comboBoxTheme_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!themeLoaded)
+                return;
+
+            //Show the chosen theme right away
+            TS_SE_Tool.Utilities.UITheme.Mode = (TS_SE_Tool.Utilities.UIThemeMode)comboBoxTheme.SelectedIndex;
+            TS_SE_Tool.Utilities.UITheme.ApplyToOpenForms();
         }
 
         private void SaveSettings()
         {
             Properties.Settings.Default.ShowSplashOnStartup = checkBoxShowSplashOnStartup.Checked;
             Properties.Settings.Default.CheckUpdatesOnStartup = checkBoxCheckUpdatesOnStartup.Checked;
+            Properties.Settings.Default.AppTheme = TS_SE_Tool.Utilities.UITheme.ModeToString((TS_SE_Tool.Utilities.UIThemeMode)comboBoxTheme.SelectedIndex);
             Properties.Settings.Default.Save();
+
+            TS_SE_Tool.Utilities.UITheme.Mode = (TS_SE_Tool.Utilities.UIThemeMode)comboBoxTheme.SelectedIndex;
+            TS_SE_Tool.Utilities.UITheme.ApplyToOpenForms();
             this.Close();
         }
 

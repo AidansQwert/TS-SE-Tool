@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2016-2022 LIPtoH <liptoh.codebase@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +49,8 @@ namespace TS_SE_Tool
             this.labelCheckUpdatesOnStartup = new System.Windows.Forms.Label();
             this.checkBoxShowSplashOnStartup = new System.Windows.Forms.CheckBox();
             this.checkBoxCheckUpdatesOnStartup = new System.Windows.Forms.CheckBox();
+            this.labelTheme = new System.Windows.Forms.Label();
+            this.comboBoxTheme = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,6 +64,8 @@ namespace TS_SE_Tool
             this.tableLayoutPanel1.Controls.Add(this.labelCheckUpdatesOnStartup, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxShowSplashOnStartup, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.checkBoxCheckUpdatesOnStartup, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.labelTheme, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.comboBoxTheme, 1, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -73,7 +77,7 @@ namespace TS_SE_Tool
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(264, 219);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(344, 219);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // buttonSave
@@ -111,7 +115,7 @@ namespace TS_SE_Tool
             // 
             // checkBoxShowSplashOnStartup
             // 
-            this.checkBoxShowSplashOnStartup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxShowSplashOnStartup.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.checkBoxShowSplashOnStartup.AutoSize = true;
             this.checkBoxShowSplashOnStartup.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBoxShowSplashOnStartup.Location = new System.Drawing.Point(214, 38);
@@ -122,7 +126,7 @@ namespace TS_SE_Tool
             // 
             // checkBoxCheckUpdatesOnStartup
             // 
-            this.checkBoxCheckUpdatesOnStartup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxCheckUpdatesOnStartup.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.checkBoxCheckUpdatesOnStartup.AutoSize = true;
             this.checkBoxCheckUpdatesOnStartup.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBoxCheckUpdatesOnStartup.Location = new System.Drawing.Point(214, 68);
@@ -135,9 +139,38 @@ namespace TS_SE_Tool
             // 
             // FormProgramSettings
             // 
+            // 
+            // labelTheme
+            // 
+            this.labelTheme.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labelTheme.AutoSize = true;
+            this.labelTheme.Location = new System.Drawing.Point(3, 99);
+            this.labelTheme.Name = "labelTheme";
+            this.labelTheme.Size = new System.Drawing.Size(82, 13);
+            this.labelTheme.TabIndex = 6;
+            this.labelTheme.Text = "Interface theme";
+            // 
+            // comboBoxTheme
+            // 
+            this.comboBoxTheme.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxTheme.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTheme.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBoxTheme.FormattingEnabled = true;
+            this.comboBoxTheme.Items.AddRange(new object[] {
+            "System",
+            "Light",
+            "Dark"});
+            this.comboBoxTheme.Location = new System.Drawing.Point(214, 95);
+            this.comboBoxTheme.Name = "comboBoxTheme";
+            this.comboBoxTheme.Size = new System.Drawing.Size(127, 21);
+            this.comboBoxTheme.TabIndex = 7;
+            this.comboBoxTheme.SelectedIndexChanged += new System.EventHandler(this.comboBoxTheme_SelectedIndexChanged);
+            // 
+            // FormProgramSettings
+            // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(264, 219);
+            this.ClientSize = new System.Drawing.Size(344, 219);
             this.Controls.Add(this.tableLayoutPanel1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -158,5 +191,7 @@ namespace TS_SE_Tool
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Label labelShowSplashOnStartup;
         private System.Windows.Forms.CheckBox checkBoxShowSplashOnStartup;
+        private System.Windows.Forms.Label labelTheme;
+        private System.Windows.Forms.ComboBox comboBoxTheme;
     }
 }
