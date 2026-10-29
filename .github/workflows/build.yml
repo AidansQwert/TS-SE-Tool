@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Add NuGet to PATH
+        uses: nuget/setup-nuget@v2
+
+      # packages.config projects resolve their HintPath as ..\packages\..., i.e.
+      # a "packages" folder next to the solution. The post-build step copies the
+      # SQL Server Compact native binaries from there, so the folder must exist
+      # at the solution root, not inside the project.
+      - name: Restore NuGet packages
+        run: nuget restore "TS SE Tool.sln" -PackagesDirectory packages
+
+      - name: Build
+        run: msbuild "TS SE Tool.sln" /m /v:minimal /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: TS-SE-Tool-Release
+          if-no-files-found: error
+          path: |
+            TS SE Tool/bin/Release/**
+            TS SET Updater/bin/Release/**
+            !**/*.pdb
