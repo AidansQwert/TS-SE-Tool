@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2016-2022 LIPtoH <liptoh.codebase@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,9 @@ namespace TS_SE_Tool
 {
     static class Program
     {
+        //Windows that already carry the current theme
+        private static readonly HashSet<Form> themedForms = new HashSet<Form>();
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -49,8 +52,57 @@ namespace TS_SE_Tool
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            //Interface theme chosen in the program settings
+            try
+            {
+                UITheme.Mode = UITheme.ParseMode(Properties.Settings.Default.AppTheme);
+            }
+            catch
+            {
+                UITheme.Mode = UIThemeMode.System;
+            }
+
+            //The theme is installed here, once, instead of in every form's constructor:
+            //each window is painted the first time it appears.
+            Application.Idle += new EventHandler(ThemeNewForms);
+
             Application.Run(new FormMain());
             IO_Utilities.LogWriter("--- END ---");
+        }
+
+        /// <summary>
+        /// Paints every window that has been opened since the last idle cycle.
+        /// </summary>
+        private static void ThemeNewForms(object sender, EventArgs e)
+        {
+            try
+            {
+                FormCollection openForms = Application.OpenForms;
+
+                for (int i = 0; i < openForms.Count; i++)
+                {
+                    Form form = openForms[i];
+
+                    if (form == null || themedForms.Contains(form))
+                        continue;
+
+                    themedForms.Add(form);
+                    UITheme.Apply(form);
+                }
+            }
+            catch
+            { }
+        }
+
+        /// <summary>
+        /// Repaints every open window after the theme was changed in the program settings.
+        /// </summary>
+        public static void ReapplyTheme()
+        {
+            themedForms.Clear();
+            UITheme.ApplyToOpenForms();
+            ThemeNewForms(null, EventArgs.Empty);
         }
 
         // Handle the UI exceptions by showing a dialog box, and asking the user whether
