@@ -39,13 +39,31 @@ jobs:
         uses: nuget/setup-nuget@v2
 
       # The updater project already writes to "TS SE Tool/bin/Release/updater",
-      # which is the path FormCheckUpdates looks in, so the packaging step only
-      # has to take bin\Release as it is.
+      # which is the path FormCheckUpdates looks in, so bin\Release is taken as
+      # it is.
       - name: Restore NuGet packages
         run: nuget restore "TS SE Tool.sln" -PackagesDirectory packages
 
       - name: Build
         run: msbuild "TS SE Tool.sln" /m /v:minimal /p:Configuration=Release /p:Platform="Any CPU"
+
+      # These folders are runtime data, not build output. The program reads them
+      # relative to its working directory, and FormMain.LoadExtImages() calls
+      # Image.FromFile("img\UI\globe.png") in its constructor, so a package
+      # without them shows "Non-UI Error" instead of starting. They are not
+      # produced by the build and are not in the repository yet, so this fails
+      # loudly rather than shipping a package that cannot run.
+      - name: Check runtime data folders
+        shell: pwsh
+        run: |
+          $required = @('img', 'lang')
+          $missing = @($required | Where-Object { -not (Test-Path "TS SE Tool/$_") })
+
+          if ($missing.Count -gt 0) {
+            throw ("Runtime data folders are missing from the repository: " + ($missing -join ', ') + ". " +
+                   "The program reads img\UI\*.png, img\*.dds and lang\*.csv at startup and dies when one is absent. " +
+                   "Copy those folders from an official release into the 'TS SE Tool' project folder and commit them.")
+          }
 
       - name: Package
         shell: pwsh
@@ -53,6 +71,13 @@ jobs:
           $staging = "package"
           New-Item -ItemType Directory -Path $staging | Out-Null
           Copy-Item -Path "TS SE Tool/bin/Release/*" -Destination $staging -Recurse
+
+          foreach ($dataDir in 'img', 'lang', 'gameref', 'dbs') {
+            if (Test-Path "TS SE Tool/$dataDir") {
+              Copy-Item -Path "TS SE Tool/$dataDir" -Destination $staging -Recurse
+            }
+          }
+
           Compress-Archive -Path "$staging/*" -DestinationPath "TS-SE-Tool-$env:TAG.zip"
           Get-Item "TS-SE-Tool-$env:TAG.zip" | Select-Object Name, Length | Format-List
 
